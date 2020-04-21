@@ -1,2 +1,5 @@
 # telegramCurrencyBot
-My first telegram bot
+
+- Answers with Euro price to command /euro
+-
+-
