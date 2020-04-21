@@ -11,7 +11,7 @@ import json  # read data from API response
 import string
 
 
-API_LINK = "https://free.currconv.com/api/v7/convert?q=EUR_MDL&compact=ultra&apiKey=446a1c3f6ca25a4c2315"
+API_LINK_EURO = "https://free.currconv.com/api/v7/convert?q=EUR_MDL&compact=ultra&apiKey="
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36'
 }
