@@ -1,9 +1,8 @@
 from typing import Dict
 from datetime import datetime
-from time import strftime
 
-import requests  # fetch data from currency API
-import json  # read data from API response
+import requests
+import json
 
 from currency import Currency
 from secrets import API_KEY
