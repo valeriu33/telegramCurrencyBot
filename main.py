@@ -1,27 +1,19 @@
 import threading  # run multiple schedules at once
 import schedule  # update the currency data without command
 import time  # sleep() after running schedule in while True
+from datetime import datetime, timedelta
 
 import telegram  # send messages
 from telegram.ext import Updater, CommandHandler  # handle commands
 
-import requests  # fetch data from currency API
-import json  # read data from API response
-
 import string
 
-
-API_LINK_EURO = "https://free.currconv.com/api/v7/convert?q=EUR_MDL&compact=ultra&apiKey="
-HEADERS = {
-    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36'
-}
-
-BOT_TOKEN = 
-CHAT_ID =
+from secrets import BOT_TOKEN, CHAT_ID, API_KEY  # a class where I keep my secrets ;)
+from currency import Currency
+from api_access import get_all_prices_from_API, get_price_from_API_for, get_all_prices_from_API_for_date
 
 
-def run_schedules_on_bg_thread(interval=1):
-
+def run_schedules_on_bg_thread(interval=1):  # copied from here https://github.com/mrhwick/schedule/blob/master/schedule/__init__.py (run_continuously)
     cease_continuous_run = threading.Event()
 
     class ScheduleThread(threading.Thread):
@@ -41,16 +33,19 @@ def run_threaded(job_function):  # run every schedule on different threads
     job_thread.start()
 
 
-def get_euro_price_from_API() -> float:  # TODO: add error handling
-    api_response = requests.get(API_LINK, headers=HEADERS)
-    currency = json.loads(api_response.content)
-    return round(currency["EUR_MDL"], 2)
-
-
 def verify_price():
-    curr = get_euro_price_from_API()
-    if curr >= 20 or curr <= 19:
-        send_message("Pizdetz, schimba leii, euro costa: " + curr)
+    curr_prices = get_all_prices_from_API()
+    yesterday_prices = get_all_prices_from_API_for_date(search_date=datetime.today() - timedelta(days=1))
+
+    print("verified euro for today= " + str(curr_prices[Currency.EURO]) + " & yesterday= " + str(yesterday_prices[Currency.EURO]))
+    if abs(curr_prices[Currency.EURO] - yesterday_prices[Currency.EURO]) >= 0.2:
+        send_message("wtf, man, euro is: " + str(curr_prices[Currency.EURO]) + ", just yesterday it was: " +
+                     str(yesterday_prices[Currency.EURO]))
+
+    print("verified dollar for today= " + str(curr_prices[Currency.US_DOLLAR]) + " & yesterday= " + str(yesterday_prices[Currency.US_DOLLAR]))
+    if abs(curr_prices[Currency.US_DOLLAR] - yesterday_prices[Currency.US_DOLLAR]) >= 0.2:
+        send_message("wtf, man, a dollar is: " + str(curr_prices[Currency.US_DOLLAR]) + ", just yesterday it was: " +
+                     str(yesterday_prices[Currency.US_DOLLAR]))
 
 
 def send_message(message: string):
@@ -59,25 +54,59 @@ def send_message(message: string):
     print(message + " message sent")
 
 
-def send_euro_price_message():  # don't know how to pass send_message()'s arguments in add_handler()
-    send_message(get_euro_price_from_API())
+def send_all_prices_message():
+    curr_prices = get_all_prices_from_API()
+    bot = telegram.Bot(token=BOT_TOKEN)
+    try:
+        bot.sendMessage(chat_id=CHAT_ID, text="1€ = " + str(curr_prices[Currency.EURO]) + "mdl, 1$ = " + str(
+                                    curr_prices[Currency.US_DOLLAR]) + "mdl")
+    except ConnectionError:
+        bot.sendMessage(chat_id=CHAT_ID, text="Currency service unavailable")
 
 
-def send_message_bot(update, context):  # signature needed for telegram API
+def handle_start_command(update, context):
+    print("handling command: /start")
+    context.bot.sendMessage(chat_id=update.effective_chat.id, text="Available commands: /euro, /dollar, /all")
+
+
+def handle_euro_command(update, context):
     print("handling command: /euro")
-    context.bot.sendMessage(chat_id=update.effective_chat.id, text=get_euro_price_from_API())
+    try:
+        context.bot.sendMessage(chat_id=update.effective_chat.id, text="1€ = " + str(get_price_from_API_for(Currency.EURO)) + "mdl")
+    except ConnectionError:
+        context.bot.sendMessage(chat_id=update.effective_chat.id, text="Currency service unavailable")
+
+
+def handle_dollar_command(update, context):
+    print("handling command: /dollar")
+    try:
+        context.bot.sendMessage(chat_id=update.effective_chat.id, text="1$ = " + str(get_price_from_API_for(Currency.US_DOLLAR)) + "mdl")
+    except ConnectionError:
+        context.bot.sendMessage(chat_id=update.effective_chat.id, text="Currency service unavailable")
+
+
+def handle_all_command(update, context):
+    print("handling command: /all")
+    curr_prices = get_all_prices_from_API()
+    try:
+        context.bot.sendMessage(chat_id=update.effective_chat.id, text="1€ = " + str(curr_prices[Currency.EURO]) + "mdl, 1$ = " + str(curr_prices[Currency.US_DOLLAR]) + "mdl")
+    except ConnectionError:
+        context.bot.sendMessage(chat_id=update.effective_chat.id, text="Currency service unavailable")
 
 
 def add_command_handler():
     updater = Updater(BOT_TOKEN, use_context=True)
 
-    updater.dispatcher.add_handler(CommandHandler('euro', send_message_bot))
+    updater.dispatcher.add_handler(CommandHandler('start', handle_start_command))
+    updater.dispatcher.add_handler(CommandHandler('euro', handle_euro_command))
+    updater.dispatcher.add_handler(CommandHandler('dollar', handle_dollar_command))
+    updater.dispatcher.add_handler(CommandHandler('all', handle_all_command))
     updater.start_polling()
     updater.idle()
 
 
 schedule.every().hour.do(run_threaded, verify_price)
-schedule.every().day.at('05:00').do(run_threaded, send_euro_price_message)  # every day at 08:00 UTC+3
+schedule.every().day.at('05:00').do(run_threaded, send_all_prices_message)  # every day at 08:00 UTC+3
 
 
 if __name__ == '__main__':
