@@ -5,15 +5,7 @@
 - Once in hour checks the price and sends a message when a currency price has changes with more than 0.2 MDL from yesterday
 
 
-after ```git clone``` add new file in the project folder, name it ```secrets.py``` and add these three lines of code:
-```
-BOT_TOKEN = 'your telegram bot token'
-CHAT_ID = your chat id between you and bot
-API_KEY = 'your API key from currencyconverterapi'
-```
-
-BOT_TOKEN: you can get from here: https://core.telegram.org/bots#3-how-do-i-create-a-bot
-
-CHAT_ID: here's how to get it: https://docs.influxdata.com/kapacitor/v1.5/event_handlers/telegram/#get-your-telegram-chat-id
-
-API_KEY: login here and take your free API-key: https://free.currencyconverterapi.com/
+The application expects the following environment variables:
+* [BOT_TOKEN](https://core.telegram.org/bots#3-how-do-i-create-a-bot)
+* [CHAT_ID](https://docs.influxdata.com/kapacitor/v1.5/event_handlers/telegram/#get-your-telegram-chat-id) *For scheduled run, leave empty otherwise.*
+* [API_KEY](https://free.currencyconverterapi.com/) *Get a free API-key. Don't forget to approve.*
