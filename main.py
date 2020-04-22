@@ -1,10 +1,10 @@
-import threading  # run multiple schedules at once
-import schedule  # update the currency data without command
-import time  # sleep() after running schedule in while True
+import threading
+import schedule
+import time
 from datetime import datetime, timedelta
 
-import telegram  # send messages
-from telegram.ext import Updater, CommandHandler  # handle commands
+import telegram
+from telegram.ext import Updater, CommandHandler
 
 import string
 
