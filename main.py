@@ -1,3 +1,4 @@
+import os
 import threading
 import schedule
 import time
@@ -8,12 +9,15 @@ from telegram.ext import Updater, CommandHandler
 
 import string
 
-from secrets import BOT_TOKEN, CHAT_ID, API_KEY  # a class where I keep my secrets ;)
 from currency import Currency
 from api_access import get_all_prices_from_API, get_price_from_API_for, get_all_prices_from_API_for_date
 
 
-def run_schedules_on_bg_thread(interval=1):  # copied from here https://github.com/mrhwick/schedule/blob/master/schedule/__init__.py (run_continuously)
+BOT_TOKEN = os.environ['BOT_TOKEN']
+CHAT_ID = os.environ['CHAT_ID']
+
+
+def run_schedules_on_bg_thread(interval=1):
     cease_continuous_run = threading.Event()
 
     class ScheduleThread(threading.Thread):

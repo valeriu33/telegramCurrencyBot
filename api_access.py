@@ -1,16 +1,16 @@
+import os
+import json
+import requests
+
 from typing import Dict
 from datetime import datetime
-
-import requests
-import json
-
 from currency import Currency
-from secrets import API_KEY
 
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36'
 }
 API_LINK = "https://free.currconv.com/api/v7/"
+API_KEY = os.environ['API_KEY']
 
 
 def get_price_from_API_for(currency: Currency) -> float:
