@@ -5,11 +5,11 @@
 - Once in hour checks the price and sends a message when a currency price has changes with more than 0.2 MDL from yesterday
 
 
-after ```git clone``` add new file in the project folder, name it ```secrets.py``` and add three lines of code:
+after ```git clone``` add new file in the project folder, name it ```secrets.py``` and add these three lines of code:
 ```
-BOT_TOKEN = 'your telegram bot'
-CHAT_ID = your chat id
-API_KEY = 'your API key'
+BOT_TOKEN = 'your telegram bot token'
+CHAT_ID = your chat id between you and bot
+API_KEY = 'your API key from currencyconverterapi'
 ```
 
 BOT_TOKEN: you can get from here: https://core.telegram.org/bots#3-how-do-i-create-a-bot
